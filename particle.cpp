@@ -13,6 +13,7 @@ void Momentum::print() const {
             << "(" << x << ", " << y << ", " << z << ")";
 };
 double Momentum::norm() const { return std::hypot(x, y, z); }
+
 Particle::Particle(char* name, double x = 0, double y = 0, double z = 0)
     : momentum_{x, y, z} {
   std::size_t index = FindParticle(name);
@@ -22,9 +23,11 @@ Particle::Particle(char* name, double x = 0, double y = 0, double z = 0)
     index_ = index;
   }
 }
-Momentum operator+(Momentum const& a, Momentum const& b){
-    return Momentum {a.x + b.x, a.y + b.y, a.z + b.z}; 
+Momentum operator+(Momentum const& a, Momentum const& b) {
+  return Momentum{a.x + b.x, a.y + b.y, a.z + b.z};
 }
+
+std::vector<ParticleType*> Particle::types_;
 int Particle::getIndex() const { return index_; }
 std::size_t Particle::FindParticle(const char* name) {
   for (size_t i = 0; i < types_.size(); ++i) {
@@ -74,12 +77,13 @@ double Particle::getMass() const { return types_[index_]->getMass(); }
 double Particle::getEnergy() const {
   return std::hypot(getMass(), momentum_.norm());
 }
-double Particle::getInvariantMass(Particle const& other) const{
-    return std::sqrt(std::pow(other.getEnergy() + this->getEnergy(),2) - std::pow((this->momentum_ + other.momentum_).norm(), 2));
+double Particle::getInvariantMass(Particle const& other) const {
+  return std::sqrt(std::pow(other.getEnergy() + this->getEnergy(), 2) -
+                   std::pow((this->momentum_ + other.momentum_).norm(), 2));
 }
-void Particle::setMomentum(double px, double py, double pz){
-    momentum_.x = px;
-    momentum_.y = py;
-    momentum_.z = pz;
+void Particle::setMomentum(double px, double py, double pz) {
+  momentum_.x = px;
+  momentum_.y = py;
+  momentum_.z = pz;
 }
 }  // namespace p
