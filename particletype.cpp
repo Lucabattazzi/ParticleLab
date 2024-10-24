@@ -13,4 +13,5 @@ void ParticleType::print() const {
 ParticleType::ParticleType(const char* name, const double mass,
                            const int charge)
     : name_{name}, mass_{mass}, charge_{charge} {};
+double ParticleType::getWidth() const { return 0.; }
 }  // namespace p

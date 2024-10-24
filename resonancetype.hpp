@@ -4,8 +4,8 @@
 namespace p {
 class ResonanceType : public ParticleType {
  public:
-  double getWidth() const;
-  void print() const;
+  double getWidth() const override;
+  void print() const override;
   ResonanceType(const char*, const double, const int, const double);
 
  private:

@@ -33,12 +33,14 @@ class Particle {
   static void PrintParticleTypes();
   static void AddParticleType(const char*, const double, const int,
                               const double);
+  int Decay2Body(Particle &, Particle &) const;
 
  private:
   static std::vector<ParticleType*> types_;
   Momentum momentum_;
   int index_;
   static std::size_t FindParticle(const char*);
+  void Boost(double, double, double);
 };
 
 }  // namespace p
