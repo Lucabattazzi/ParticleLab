@@ -1,17 +1,18 @@
 #ifndef PARTICLETYPE_H
 #define PARTICLETYPE_H
+#include <string>
 namespace p {
 class ParticleType {
  public:
-  const char* getName() const;
+  const std::string getName() const;
   double getMass() const;
   int getCharge() const;
   virtual void print() const;
   virtual double getWidth() const;
-  ParticleType(const char*, const double, const int);
+  ParticleType(const std::string, const double, const int);
 
  private:
-  const char* name_;
+  const std::string name_;
   const double mass_;
   const int charge_;
 };

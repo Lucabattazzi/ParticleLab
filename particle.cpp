@@ -14,9 +14,8 @@ void Momentum::print() const {
             << "(" << x << ", " << y << ", " << z << ")";
 };
 double Momentum::norm() const { return std::hypot(x, y, z); }
-
-Particle::Particle(char* name, double x = 0, double y = 0, double z = 0)
-    : momentum_{x, y, z} {
+Particle::Particle(std::string name) : name_ { name };
+Particle::Particle(std::string name, Momentum momentum) : momentum_{momentum} {
   std::size_t index = FindParticle(name);
   if (index != types_.size()) {
     std::cout << "abort \n";
@@ -30,17 +29,17 @@ Momentum operator+(Momentum const& a, Momentum const& b) {
 
 std::vector<ParticleType*> Particle::types_;
 int Particle::getIndex() const { return index_; }
-std::size_t Particle::FindParticle(const char* name) {
+std::size_t Particle::FindParticle(const std::string name) {
   for (size_t i = 0; i < types_.size(); ++i) {
-    if (*types_[i]->getName() == *name) {
+    if (types_[i]->getName() == name) {
       return i;
     }
   }
   std::cout << "not found \n";
   return types_.size();
 }
-void Particle::AddParticleType(const char* name, const double mass,
-                               const int charge, const double width = 0) {
+void Particle::AddParticleType(const std::string name, double mass, int charge,
+                               double width = 0.) {
   if (FindParticle(name) == types_.size() && types_.size() <= maxtypes) {
     if (width == 0) {
       ParticleType* particle = new ParticleType(name, mass, charge);
@@ -54,7 +53,7 @@ void Particle::AddParticleType(const char* name, const double mass,
   std::cout << "Cannot add \n";
 };
 void Particle::setIndex(const int index) { index_ = index; };
-void Particle::setIndex(const char* name) {
+void Particle::setIndex(const std::string name) {
   std::size_t index = FindParticle(name);
   if (index == types_.size()) {
     std::cout << "abort \n";
@@ -69,7 +68,7 @@ void Particle::PrintParticleTypes() {
   }
 };
 void Particle::printParticle() {
-  std::cout << "Index: " << index_ << "   Name: " << *types_[index_]->getName();
+  std::cout << "Index: " << index_ << "   Name: " << types_[index_]->getName();
   momentum_.print();
   std::cout << "\n";
 };
@@ -89,7 +88,7 @@ void Particle::setMomentum(double px, double py, double pz) {
 }
 int Particle::Decay2Body(Particle& dau1, Particle& dau2) const {
   if (getMass() == 0.0) {
-    printf("Decayment cannot be preformed if mass is zero\n");
+    std::cout << "Decayment cannot be preformed if mass is zero\n";
     return 1;
   }
   double massMot = getMass();
@@ -116,9 +115,9 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const {
   }
 
   if (massMot < massDau1 + massDau2) {
-    printf(
-        "Decayment cannot be preformed because mass is too low in this "
-        "channel\n");
+    std::cout
+        << "Decayment cannot be preformed because mass is too low in this "
+           "channel\n";
     return 2;
   }
 
