@@ -16,29 +16,31 @@ struct Momentum {
   void print() const;
 };
 
-Momentum operator+(Momentum const&, Momentum const&);
+Momentum operator+(Momentum const &, Momentum const &);
 
 class Particle {
  public:
-  Particle(char*, double, double, double);
+  Particle(std::string, Momentum const &);
+  Particle(std::string);
   Momentum getMomentum() const;
   int getIndex() const;
   double getMass() const;
   double getEnergy() const;
-  double getInvariantMass(Particle const&) const;
+  double getInvariantMass(Particle const &) const;
   void setMomentum(double, double, double);
-  void setIndex(const char*);
+  void setIndex(const std::string);
   void setIndex(const int);
   void printParticle();
   static void PrintParticleTypes();
-  static void AddParticleType(const char*, const double, const int,
-                              const double);
+  static void AddParticleType(const std::string, double, int, double);
+  int Decay2Body(Particle &, Particle &) const;
 
  private:
-  static std::vector<ParticleType*> types_;
+  static std::vector<ParticleType *> types_;
   Momentum momentum_;
   int index_;
-  static std::size_t FindParticle(const char*);
+  static std::size_t FindParticle(const std::string);
+  void Boost(double, double, double);
 };
 
 }  // namespace p
