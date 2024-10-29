@@ -7,7 +7,7 @@
 // R_LOAD_LIBRARY(particletype_cpp.so)
 // R_LOAD_LIBRARY(resonancetype_cpp.so)
 
-int test2() {
+int main() {
   p::Particle::AddParticleType("pion+", 0.13957, 1., 0.);
   p::Particle::AddParticleType("pion-", 0.13957, -1., 0.);
   p::Particle::AddParticleType("kaon+", 0.49367, 1., 0.);

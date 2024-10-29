@@ -14,18 +14,37 @@ void Momentum::print() const {
             << "(" << x << ", " << y << ", " << z << ")";
 };
 double Momentum::norm() const { return std::hypot(x, y, z); }
-Particle::Particle(std::string name) : name_ { name };
-Particle::Particle(std::string name, Momentum momentum) : momentum_{momentum} {
+Particle::Particle(std::string name){
   std::size_t index = FindParticle(name);
   if (index != types_.size()) {
     std::cout << "abort \n";
   } else {
     index_ = index;
   }
+};
+
+Particle::Particle(std::string name, Momentum const& momentum) : momentum_{momentum} {
+  std::size_t index = FindParticle(name);
+  if (index != types_.size()) {
+    std::cout << "abort \n";
+  } else {
+    index_ = index;
+  }
+
 }
-Momentum operator+(Momentum const& a, Momentum const& b) {
-  return Momentum{a.x + b.x, a.y + b.y, a.z + b.z};
-}
+
+void Particle::setMomentum(double x, double y, double z) {
+momentum_.x = x;
+momentum_.y = y;
+momentum_.z = z;
+};
+
+std::string Particle::getName() const {
+  return types_[getIndex()]->getName();
+};
+
+
+Momentum operator+(Momentum const& a, Momentum const& b) { return Momentum{a.x + b.x, a.y + b.y, a.z + b.z}; }
 
 std::vector<ParticleType*> Particle::types_;
 int Particle::getIndex() const { return index_; }
@@ -38,8 +57,7 @@ std::size_t Particle::FindParticle(const std::string name) {
   std::cout << "not found \n";
   return types_.size();
 }
-void Particle::AddParticleType(const std::string name, double mass, int charge,
-                               double width = 0.) {
+void Particle::AddParticleType(const std::string name, double mass, int charge, double width = 0.) {
   if (FindParticle(name) == types_.size() && types_.size() <= maxtypes) {
     if (width == 0) {
       ParticleType* particle = new ParticleType(name, mass, charge);
@@ -74,18 +92,18 @@ void Particle::printParticle() {
 };
 Momentum Particle::getMomentum() const { return momentum_; }
 double Particle::getMass() const { return types_[index_]->getMass(); }
-double Particle::getEnergy() const {
-  return std::hypot(getMass(), momentum_.norm());
+double Particle::getEnergy() const { return std::hypot(getMass(), momentum_.norm()); }
+double Particle::getInvariantMass(Particle const& other) const { return std::sqrt(std::pow(other.getEnergy() + this->getEnergy(), 2) - std::pow((this->momentum_ + other.momentum_).norm(), 2)); }
+void Particle::setMomentum(Momentum const& momentum) {
+  momentum_.x = momentum.x;
+  momentum_.y = momentum.y;
+  momentum_.z = momentum.z;
 }
-double Particle::getInvariantMass(Particle const& other) const {
-  return std::sqrt(std::pow(other.getEnergy() + this->getEnergy(), 2) -
-                   std::pow((this->momentum_ + other.momentum_).norm(), 2));
-}
-void Particle::setMomentum(double px, double py, double pz) {
-  momentum_.x = px;
-  momentum_.y = py;
-  momentum_.z = pz;
-}
+
+int Particle::getCharge() const {
+ return(types_[getIndex()]->getCharge());
+};
+
 int Particle::Decay2Body(Particle& dau1, Particle& dau2) const {
   if (getMass() == 0.0) {
     std::cout << "Decayment cannot be preformed if mass is zero\n";
@@ -115,29 +133,21 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const {
   }
 
   if (massMot < massDau1 + massDau2) {
-    std::cout
-        << "Decayment cannot be preformed because mass is too low in this "
-           "channel\n";
+    std::cout << "Decayment cannot be preformed because mass is too low in this "
+                 "channel\n";
     return 2;
   }
 
-  double pout =
-      sqrt(
-          (massMot * massMot - (massDau1 + massDau2) * (massDau1 + massDau2)) *
-          (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2))) /
-      massMot * 0.5;
+  double pout = sqrt((massMot * massMot - (massDau1 + massDau2) * (massDau1 + massDau2)) * (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2))) / massMot * 0.5;
 
   double norm = 2 * M_PI / RAND_MAX;
 
   double phi = rand() * norm;
   double theta = rand() * norm * 0.5 - M_PI / 2.;
-  dau1.setMomentum(pout * sin(theta) * cos(phi), pout * sin(theta) * sin(phi),
-                   pout * cos(theta));
-  dau2.setMomentum(-pout * sin(theta) * cos(phi), -pout * sin(theta) * sin(phi),
-                   -pout * cos(theta));
+  dau1.setMomentum(pout * sin(theta) * cos(phi), pout * sin(theta) * sin(phi), pout * cos(theta));
+  dau2.setMomentum(-pout * sin(theta) * cos(phi), -pout * sin(theta) * sin(phi), -pout * cos(theta));
 
-  double energy = sqrt(momentum_.x * momentum_.x + momentum_.y * momentum_.y +
-                       momentum_.z * momentum_.z + massMot * massMot);
+  double energy = sqrt(momentum_.x * momentum_.x + momentum_.y * momentum_.y + momentum_.z * momentum_.z + massMot * massMot);
 
   double bx = momentum_.x / energy;
   double by = momentum_.y / energy;
