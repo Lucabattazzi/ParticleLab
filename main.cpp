@@ -1,13 +1,15 @@
+#include <TFile.h>
 #include <TH1F.h>
 #include <TMath.h>
 #include <TRandom.h>
 
 #include <cmath>
+#include <iostream>
 
 #include "particle.hpp"
 #include "particletype.hpp"
 
-int main() {
+void loop() {
   p::Particle::AddParticleType("pion+", 0.13957, 1., 0.);
   p::Particle::AddParticleType("pion-", 0.13957, -1., 0.);
   p::Particle::AddParticleType("kaon+", 0.49367, 1., 0.);
@@ -16,7 +18,7 @@ int main() {
   p::Particle::AddParticleType("proton-", 0.93827, -1., 0.);
   p::Particle::AddParticleType("k*", 0.89166, 0., 0.050);
   TRandom randGen;
-  gRandom->SetSeed();
+  gRandom->SetSeed(567856);
   std::vector<p::Particle> event;
   event.reserve(100);
   std::vector<p::Particle> decayed;
@@ -36,14 +38,25 @@ int main() {
   TH1F* invariant_mass__same_pk_histo = new TH1F("invariant_mass_same_pk_histo", "Invariant mass between pions and kaons of same charge", 100, 0, 10);              // on stable
   TH1F* invariant_mass__opposite_pk_histo = new TH1F("invariant_mass_opposite_pk_histo", "Invariant mass between pions and kaons of opposite charge", 100, 0, 10);  // on stable
   TH1F* invariant_mass_decayed_histo = new TH1F("invariant_mass_decayed_histo", "Invariant massbetween decayed particles", 100, 0, 10);                             // on decayed, for benchmark
-  for (int i = 0; i < 10E5; ++i) {
-    for (int j = 0; j < 10E2; j++) {
+                                                                                                                                                                    // for (int i = 0; i < 10E5; ++i) {
+  std::cout << "error1\n";                                                                                                                                          //   for (int j = 0; j < 10E2; j++) {
+  for (int i = 0; i < 200; ++i) {
+    std::cout << i << "\n";
+    std::vector<p::Particle> event;
+    event.reserve(100);
+    std::vector<p::Particle> decayed;
+    decayed.reserve(20);
+    std::vector<p::Particle> stable;
+    stable.reserve(120);
+
+    for (int j = 0; j < 10; j++) {
+      std::cout << j << "\n";
       double phi = randGen.Uniform(2 * TMath::Pi());
       double theta = randGen.Uniform(TMath::Pi());
       double norm = randGen.Exp(1.);
       azimuth_histo->Fill(phi);
       polar_histo->Fill(theta);
-      // impulse_histo->Fill(norm);
+      impulse_histo->Fill(norm);
       p::Momentum momentum{norm * TMath::Sin(theta) * TMath::Cos(phi), norm * TMath::Sin(theta) * TMath::Sin(phi), norm * TMath::Cos(theta)};
       double pro = gRandom->Rndm();
       p::Particle particle;
@@ -63,7 +76,9 @@ int main() {
       } else {
         particle.setIndex("k*");
       }
+      std::cout << "Progressive count 1\n";
       event.push_back(particle);
+      std::cout << "Progressive count 1.1\n";
       if (particle.getName() == "k*") {
         p::Particle pion;
         p::Particle kaon;
@@ -76,55 +91,58 @@ int main() {
           pion.setIndex("pion-");
           kaon.setIndex("kaon+");
         }
-
+std::cout << "Progressive count 2 \n";
         stable.push_back(pion);
         stable.push_back(kaon);
         decayed.push_back(pion);
         decayed.push_back(kaon);
-
+std::cout << "Progressive count2.2\n";
       } else {
+        std::cout << "Progressive count3\n";
         stable.push_back(particle);
+        std::cout << "Progressive count3.2\n";
       }
-      event.clear();
-      decayed.clear();
-      stable.clear();
+      // event.clear();   // se lo mettiamo qui buttiamo via il vettore appena riempito :)
+      // decayed.clear();
+      // stable.clear();
     }
-  }
-  // std::vector event;
-  // event.reserve(100);
-  // std::vector decayed;
-  // decayed.reserve(20);
-  // std::vector stable;
-  // stable.reserve(120);
-  for (std::size_t i = 0; i < event.size(); ++i) {
-    types_histo->Fill(event[i].getIndex());
-    impulse_histo->Fill(event[i].getMomentum().norm());
-    energy_histo->Fill(event[i].getEnergy());
-    transimpulse_histo->Fill(std::hypot(event[i].getMomentum().x, event[i].getMomentum().y));
-  }
-
-  for (std::size_t i = 0; i < decayed.size(); ++i) {
-    for (std::size_t j = i + 1; j < decayed.size(); ++j) {
-      double mass = decayed[i].getInvariantMass(decayed[j]);
+    std::cout << "error2\n";
+    for (std::size_t i = 0; i < event.size(); ++i) {
+      types_histo->Fill(event[i].getIndex());
+      impulse_histo->Fill(event[i].getMomentum().norm());
+      energy_histo->Fill(event[i].getEnergy());
+      transimpulse_histo->Fill(std::hypot(event[i].getMomentum().x, event[i].getMomentum().y));
+    }
+    std::cout << "error3\n";
+    for (std::size_t i = 0; i < decayed.size(); i += 2) {  // modificato in maniera da fare il calcolo solo su figlie della stessa madre
+      double mass = decayed[i].getInvariantMass(decayed[i + 1]);
       invariant_mass_decayed_histo->Fill(mass);
     }
-  }
-
-  for (std::size_t i = 0; i < stable.size(); ++i) {
-    for (std::size_t j = i + 1; j < stable.size(); ++j) {
-      double mass = stable[i].getInvariantMass(stable[j]);
-      invariant_mass__all_histo->Fill(mass);
-      if (stable[i].getCharge() == stable[j].getCharge()) {
-        invariant_mass__same_histo->Fill(mass);
-        if (((stable[i].getName() == "pion+" && stable[j].getName() == "kaon+") || (stable[i].getName() == "kaon+" && stable[j].getName() == "pion+")) || (stable[i].getName() == "pion-" && stable[j].getName() == "kaon-") || (stable[i].getName() == "kaon-" && stable[j].getName() == "pion-")) {
+    std::cout << "error4\n";
+    for (std::size_t i = 0; i < stable.size(); ++i) {
+      for (std::size_t j = i + 1; j < stable.size(); ++j) {
+        double mass = stable[i].getInvariantMass(stable[j]);
+        invariant_mass__all_histo->Fill(mass);
+        if (stable[i].getCharge() == stable[j].getCharge()) {
+          invariant_mass__same_histo->Fill(mass);
+          if (((stable[i].getName() == "pion+" && stable[j].getName() == "kaon+") || (stable[i].getName() == "kaon+" && stable[j].getName() == "pion+")) || (stable[i].getName() == "pion-" && stable[j].getName() == "kaon-") || (stable[i].getName() == "kaon-" && stable[j].getName() == "pion-")) {
             invariant_mass__same_pk_histo->Fill(mass);
           };  // else nothing
-      } else {
-        invariant_mass__opposite_histo->Fill(mass);
-        if (((stable[i].getName() == "pion+" && stable[j].getName() == "kaon-") || (stable[i].getName() == "kaon-" && stable[j].getName() == "pion+")) || (stable[i].getName() == "pion-" && stable[j].getName() == "kaon+") || (stable[i].getName() == "kaon+" && stable[j].getName() == "pion-")) {
+        } else {
+          invariant_mass__opposite_histo->Fill(mass);
+          if (((stable[i].getName() == "pion+" && stable[j].getName() == "kaon-") || (stable[i].getName() == "kaon-" && stable[j].getName() == "pion+")) || (stable[i].getName() == "pion-" && stable[j].getName() == "kaon+") || (stable[i].getName() == "kaon+" && stable[j].getName() == "pion-")) {
             invariant_mass__opposite_pk_histo->Fill(mass);
           };  // else nothing
-      }       // carica
+        }     // carica
+      }
     }
+    std::cout << "error5\n";
+    event.clear();  // i vettori vanno svuotati prima di ogni loop interno, non alla fine
+    decayed.clear();
+    stable.clear();
+    std::cout << "error6\n";
   }
+  TFile* file = new TFile("partcile.root", "RECREATE");  // creates if non-existing, ovewrites otherwise.
+  std::cout << "error7\n";
+  azimuth_histo->Draw();
 }
