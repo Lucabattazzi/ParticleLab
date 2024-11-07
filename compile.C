@@ -5,5 +5,4 @@ void compile() {
   gROOT->LoadMacro("particle.cpp++");
   // gROOT->LoadMacro("test2.cpp+");
   gROOT->LoadMacro("main.cpp++");
-  std::cout<<"Success" << "\n";
 }
