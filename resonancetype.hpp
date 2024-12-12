@@ -4,7 +4,7 @@
 namespace p {
 class ResonanceType : public ParticleType {
  public:
-  double getWidth() const override;
+  double getWidth() const override; // serve avere getwidth in particletype?
   void print() const override;
   ResonanceType(const std::string, const double, const int, const double);
 
@@ -13,4 +13,4 @@ class ResonanceType : public ParticleType {
 };
 }  // namespace p
 
-#endif
+#endif 

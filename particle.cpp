@@ -14,35 +14,31 @@ void Momentum::print() const {
             << "(" << x << ", " << y << ", " << z << ")";
 };
 double Momentum::norm() const { return std::hypot(x, y, z); }
-Particle::Particle(std::string name){
+Particle::Particle(std::string name) {
   std::size_t index = FindParticle(name);
-  if (index != types_.size()) {
+  if (index == types_.size()) {
     std::cout << "abort \n";
   } else {
     index_ = index;
   }
 };
 
-Particle::Particle(std::string name, Momentum const& momentum) : momentum_{momentum} {
+Particle::Particle(std::string name, Momentum const& momentum = Momentum{0., 0., 0.}) : momentum_{momentum} {
   std::size_t index = FindParticle(name);
-  if (index != types_.size()) {
-    std::cout << "abort \n";
+  if (index == types_.size()) {
+    std::cout << "abort \n";  // da gestire con eccezioni
   } else {
     index_ = index;
   }
-
 }
 
 void Particle::setMomentum(double x, double y, double z) {
-momentum_.x = x;
-momentum_.y = y;
-momentum_.z = z;
+  momentum_.x = x;
+  momentum_.y = y;
+  momentum_.z = z;
 };
 
-std::string Particle::getName() const {
-  return types_[getIndex()]->getName();
-};
-
+std::string Particle::getName() const { return types_[getIndex()]->getName(); };
 
 Momentum operator+(Momentum const& a, Momentum const& b) { return Momentum{a.x + b.x, a.y + b.y, a.z + b.z}; }
 
@@ -54,7 +50,6 @@ std::size_t Particle::FindParticle(const std::string name) {
       return i;
     }
   }
-  std::cout << "not found \n";
   return types_.size();
 }
 void Particle::AddParticleType(const std::string name, double mass, int charge, double width = 0.) {
@@ -70,11 +65,18 @@ void Particle::AddParticleType(const std::string name, double mass, int charge, 
   }
   std::cout << "Cannot add \n";
 };
-void Particle::setIndex(const int index) { index_ = index; };
+void Particle::setIndex(const int index) {
+  if (index < types_.size()) {
+    index_ = index;
+  } else{
+    std::cout << "index not in range \n";
+  }
+  
+};
 void Particle::setIndex(const std::string name) {
   std::size_t index = FindParticle(name);
   if (index == types_.size()) {
-    std::cout << "abort \n";
+    std::cout << "not found in array \n";
   } else {
     index_ = index;
   }
@@ -100,9 +102,7 @@ void Particle::setMomentum(Momentum const& momentum) {
   momentum_.z = momentum.z;
 }
 
-int Particle::getCharge() const {
- return(types_[getIndex()]->getCharge());
-};
+int Particle::getCharge() const { return (types_[getIndex()]->getCharge()); };
 
 int Particle::Decay2Body(Particle& dau1, Particle& dau2) const {
   if (getMass() == 0.0) {
