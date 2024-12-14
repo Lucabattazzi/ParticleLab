@@ -4,9 +4,9 @@
 #include <string>
 namespace p {
 
-const std::string ParticleType::getName() const { return name_; }
-const double ParticleType::getMass() const { return mass_; } // le funzioni ritornano tipi const, o sbaglio?
-const int ParticleType::getCharge() const { return charge_; }
+std::string ParticleType::getName() const { return name_; }
+double ParticleType::getMass() const { return mass_; } // le funzioni ritornano tipi const, o sbaglio?
+int ParticleType::getCharge() const { return charge_; }
 void ParticleType::print() const {
   std::cout << "Name: " << name_ << "   Mass: " << mass_
             << "   Charge: " << charge_;

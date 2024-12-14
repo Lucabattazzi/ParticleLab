@@ -4,9 +4,9 @@
 namespace p {
 class ParticleType {
  public:
-  const std::string getName() const;
-  const double getMass() const;
-  const int getCharge() const;
+  std::string getName() const;
+  double getMass() const;
+  int getCharge() const;
   virtual void print() const;
   virtual double getWidth() const;
   ParticleType(const std::string, const double, const int);

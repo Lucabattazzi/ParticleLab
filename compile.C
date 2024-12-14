@@ -4,5 +4,6 @@ void compile() {
   gROOT->LoadMacro("resonancetype.cpp++");
   gROOT->LoadMacro("particle.cpp++");
   // gROOT->LoadMacro("test2.cpp+");
-  gROOT->LoadMacro("main.cpp++");
+  gROOT->LoadMacro("loop.cpp++");
+  gROOT ->LoadMacro("analyze.cpp++");
 }

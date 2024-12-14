@@ -66,7 +66,7 @@ void Particle::AddParticleType(const std::string name, double mass, int charge, 
   std::cout << "Cannot add \n";
 };
 void Particle::setIndex(const int index) {
-  if (index < types_.size()) {
+  if (index < static_cast <int> (types_.size())) {
     index_ = index;
   } else{
     std::cout << "index not in range \n";

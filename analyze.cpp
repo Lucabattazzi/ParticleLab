@@ -1,73 +1,94 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <iostream>
-// #include <vector>
 
 #include "TF1.h"
 #include "TFile.h"
 #include "TH1F.h"
-// #include "doctest.h"
 
 void analyze() {
-  TFile* file = new TFile("particle.root", "READ");
-  TCanvas* c1 = new TCanvas("c1", "Canvas");
-  //   c1->Divide(2,1);
-  file->ls();
-  TF1* constant_generation = new TF1("constant_generation", "[0]", 0, 2 * TMath::Pi());
-  TF1* impulse_generation = new TF1("impulse_generation", "[0]*exp([1]*x)", 0, 9);
-  TH1F* h1 = (TH1F*)file->Get("h1");
-  TH1F* h2 = (TH1F*)file->Get("h2");
-  TH1F* h3 = (TH1F*)file->Get("h3");
-  TH1F* h4 = (TH1F*)file->Get("h4");
-  TH1F* h5 = (TH1F*)file->Get("h5");
-  TH1F* h6 = (TH1F*)file->Get("h6");
-  TH1F* h7 = (TH1F*)file->Get("h7");
-  TH1F* h8 = (TH1F*)file->Get("h8");
-  TH1F* h9 = (TH1F*)file->Get("h9");
-  TH1F* h10 = (TH1F*)file->Get("h10");
-  TH1F* h11 = (TH1F*)file->Get("h11");
-  TH1F* h12 = (TH1F*)file->Get("h12");
-  TH1F* all_difference = new TH1F("all_difference", "Difference of all particles with opposite charge", 1000000, 0, 8);
-  TH1F* pk_difference = new TH1F("pk_difference", "Difference between pions and kaons with opposite charge and same charge", 100000, 0, 8);
-  // std::cout << "CHECK TOTAL ENTRIES: \n";
-  // std::cout << h1->GetTitle()<<" entries: " << h1->GetEntries() <<"; Expected: exactly 1E7\n";
-  // std::cout << h2->GetTitle()<<" entries: " << h2->GetEntries() <<"; Expected: exactly 1E7\n";
-  // std::cout << h3->GetTitle()<<" entries: " << h3->GetEntries() <<"; Expected: exactly 1E7\n";
-  // std::cout << h4->GetTitle()<<" entries: " << h4->GetEntries() <<"; Expected: exactly 1E7\n";
-  // std::cout << h5->GetTitle()<<" entries: " << h5->GetEntries() <<"; Expected: exactly 1E7\n";
-  // std::cout << h6->GetTitle()<<" entries: " << h6->GetEntries() <<"; Expected: exactly 1E7\n";
-  std::cout << "Check proportions: \n";
-  for (int i = 1; i <= h1->GetNbinsX(); i++) {
-    std::cout << h1->GetBinContent(i) / 1E5 << "% +- " << h1->GetBinError(i) / 1E5 << "%\n";
-  }
-  h2->Fit("constant_generation");
-  std::cout << "First fit, on Azimuth angle: \n";
-  std::cout << "Parameter: " << constant_generation->GetParameter(0) << "; reduced chi squared: " << constant_generation->GetChisquare() / constant_generation->GetNDF() << "; probability: " << constant_generation->GetProb() << "\n";
-  h4->Fit("constant_generation");
-  //   c1->cd(1);
-  //   h2->Draw();
-  std::cout << "Second fit, on Polar angle: \n";
-  std::cout << "Parameter: " << constant_generation->GetParameter(0) << "; reduced chi squared: " << constant_generation->GetChisquare() / constant_generation->GetNDF() << "; probability: " << constant_generation->GetProb() << "\n";
-  //   c1->cd(2);
-  //   h4->Draw();
-  // ATTENZIONE: NON FUNZIONA CORRETTAMENTE PROBABILITà
-  std::cout << "Third fit, on impulse module: \n";
-  h3->Fit("impulse_generation");
-  std::cout << "First parameter: " << impulse_generation->GetParameter(0) << "; second parameter: " << impulse_generation->GetParameter(1) << "; reduced chi squared: " << impulse_generation->GetChisquare() / impulse_generation->GetNDF() << "; probability:" << impulse_generation->GetProb() << "\n";
-  // ATTENZIONE: IL CHI QUADRO E LA PROBABILITà SONO COMPLETAMENTI DI FUORI
-  //   h3->Draw();
-  //   h4->Draw();
-  h8->Sumw2();
-  h9->Sumw2();
-  all_difference->Add(h8, h9, -1, 1);
-  h10->Sumw2();
-  h11->Sumw2();
-  pk_difference->Add(h11, h10, 1, -1);
-  pk_difference->Draw();
-}
+  TFile* data = new TFile("particle.root", "UPDATE");
+  TFile* fit = new TFile("fit.root", "RECREATE");
 
-// TEST_CASE("") {
-//   SUBCASE("") {
-//     //   CHECK(it->getPosition().x == doctest::Approx(102));
-//     //   CHECK(it->getPosition().y == doctest::Approx(102));}
-//   }
-// }
+  TF1* azimuth_fit = new TF1("azimuth_fit", "[0]", 0., 2 * TMath::Pi());
+  TF1* polar_fit = new TF1("polar_fit", "[0]", 0., 1 * TMath::Pi());
+  TF1* impulse_fit = new TF1("impulse_fit", "[0]*exp([1]*x)", 0., 9.);
+  TF1* decayed_fit = new TF1("decayed_fit", "[2]/(sqrt(2*pi)*[0])*exp(-((x-[1])^2)/(2*[0]^2))", 0.6, 1.2);
+  TF1* all_fit = new TF1("all_fit", "[2]/(sqrt(2*pi)*[0])*exp(-((x-[1])^2)/(2*[0]^2))", 0.6, 1.2);
+  TF1* pk_fit = new TF1("pk_fit", "[2]/(sqrt(2*pi)*[0])*exp(-((x-[1])^2)/(2*[0]^2))", 0.6, 1.2);
+
+  TH1F* types_histo = (TH1F*)data->Get("types_histo");
+  TH1F* azimuth_histo = (TH1F*)data->Get("azimuth_histo");
+  TH1F* polar_histo = (TH1F*)data->Get("polar_histo");
+  TH1F* impulse_histo = (TH1F*)data->Get("impulse_histo");
+  TH1F* transimpulse_histo = (TH1F*)data->Get("transimpulse_histo");
+  TH1F* energy_histo = (TH1F*)data->Get("energy_histo");
+  TH1F* invariant_mass_all_histo = (TH1F*)data->Get("invariant_mass_all_histo");
+  TH1F* invariant_mass_same_histo = (TH1F*)data->Get("invariant_mass_same_histo");
+  TH1F* invariant_mass_opposite_histo = (TH1F*)data->Get("invariant_mass_opposite_histo");
+  TH1F* invariant_mass_same_pk_histo = (TH1F*)data->Get("invariant_mass_same_pk_histo");
+  TH1F* invariant_mass_opposite_pk_histo = (TH1F*)data->Get("invariant_mass_opposite_pk_histo");
+  TH1F* invariant_mass_decayed_histo = (TH1F*)data->Get("invariant_mass_decayed_histo");
+
+  TH1F* all_difference = new TH1F("all_difference", "Difference of all particles with opposite charge", 5E2, 0, 8);
+  TH1F* pk_difference = new TH1F("pk_difference", "Difference between pions and kaons with opposite charge and same charge", 1E3, 0, 8);
+
+  std::cout << "Check proportions: \n";
+  for (int i = 1; i <= types_histo->GetNbinsX(); i++) {
+    std::cout << types_histo->GetBinContent(i) / 1E5 << "% +- " << types_histo->GetBinError(i) / 1E5 << "%\n";
+  }
+  
+  invariant_mass_same_histo->Sumw2();
+  invariant_mass_opposite_histo->Sumw2();
+  all_difference->Add(invariant_mass_same_histo, invariant_mass_opposite_histo, -1, 1);
+
+  invariant_mass_same_pk_histo->Sumw2();
+  invariant_mass_opposite_pk_histo->Sumw2();
+  pk_difference->Add(invariant_mass_opposite_pk_histo, invariant_mass_same_pk_histo, 1, -1);
+  
+  data->WriteObject(all_difference, "all_difference");
+  data->WriteObject(pk_difference, "pk_difference");
+  
+  decayed_fit->SetParameter(0, 0.05);
+  decayed_fit->SetParameter(1, 0.8917);
+  all_fit->SetParameter(0, 0.05);
+  all_fit->SetParameter(1, 0.8917);
+  pk_fit->SetParameter(0, 0.05);
+  pk_fit->SetParameter(1, 0.8917);
+  invariant_mass_decayed_histo->Fit(decayed_fit, "R");
+  all_difference->Fit(all_fit, "R");
+  pk_difference->Fit(pk_fit, "R");
+  azimuth_fit->SetParameter(0, 1E4);
+  azimuth_histo->Fit("azimuth_fit");
+  polar_fit->SetParameter(0, 1E4);
+  polar_histo->Fit("polar_fit");
+  impulse_fit->SetParameter(0, 1.);
+  impulse_histo->Fit("impulse_fit");
+
+  all_difference->GetXaxis()->SetRangeUser(0, 2);
+  pk_difference->GetXaxis()->SetRangeUser(0, 2);
+  
+  fit->WriteObject(all_difference, "all_difference");
+  fit->WriteObject(pk_difference, "pk_difference");
+  fit->WriteObject(invariant_mass_decayed_histo, "invariant_mass_decayed_histo");
+  fit->WriteObject(azimuth_histo, "azimuth_histo");
+  fit->WriteObject(polar_histo, "polar_histo");
+  fit->WriteObject(impulse_histo, "impulse_histo");
+  
+  std::cout << "First fit, on Azimuth angle: \n";
+  std::cout << "Parameter: " << azimuth_fit->GetParameter(0) << "; reduced chi squared: " << azimuth_fit->GetChisquare() / azimuth_fit->GetNDF() << "; probability: " << azimuth_fit->GetProb() << "\n";
+
+  std::cout << "Second fit, on Polar angle: \n";
+  std::cout << "Parameter: " << polar_fit->GetParameter(0) << "; reduced chi squared: " << polar_fit->GetChisquare() / polar_fit->GetNDF() << "; probability: " << polar_fit->GetProb() << "\n";
+
+  std::cout << "Third fit, on impulse module: \n";
+  std::cout << "First parameter: " << impulse_fit->GetParameter(0) << "; second parameter: " << impulse_fit->GetParameter(1) << "; reduced chi squared: " << impulse_fit->GetChisquare() / impulse_fit->GetNDF() << "; probability:" << impulse_fit->GetProb() << "\n";
+
+  std::cout << "Fourth fit, on invariant mass of decayed particles: \n";
+  std::cout << "First parameter: " << decayed_fit->GetParameter(0) << "; second parameter: " << decayed_fit->GetParameter(1) << "; third parameter: " << decayed_fit->GetParameter(2) << "; reduced chi squared: " << decayed_fit->GetChisquare() / decayed_fit->GetNDF() << "; probability:" << decayed_fit->GetProb() << "\n";
+
+  std::cout << "Fifth fit, on signal from all particles: \n";
+  std::cout << "First parameter: " << all_fit->GetParameter(0) << "; second parameter: " << all_fit->GetParameter(1) << "; third parameter: " << all_fit->GetParameter(2) << "; reduced chi squared: " << all_fit->GetChisquare() / all_fit->GetNDF() << "; probability:" << all_fit->GetProb() << "\n";
+
+  std::cout << "Sixth fit, on signal from pion and kaon particles: \n";
+  std::cout << "First parameter: " << pk_fit->GetParameter(0) << "; second parameter: " << pk_fit->GetParameter(1) << "; third parameter: " << pk_fit->GetParameter(2) << "; reduced chi squared: " << pk_fit->GetChisquare() / pk_fit->GetNDF() << "; probability:" << pk_fit->GetProb() << "\n";
+}
