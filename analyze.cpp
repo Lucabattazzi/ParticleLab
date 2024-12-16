@@ -54,14 +54,21 @@ void analyze() {
   all_fit->SetParameter(1, 0.8917);
   pk_fit->SetParameter(0, 0.05);
   pk_fit->SetParameter(1, 0.8917);
+
+    std::cout << "Fitting invariant mass decayed: \n";
   invariant_mass_decayed_histo->Fit(decayed_fit, "R");
+    std::cout << "\n Fitting difference between all oppsite-charge particles: \n";
   all_difference->Fit(all_fit, "R");
+    std::cout << "\n Fitting difference between oppsite-charge pions and kaons: \n";
   pk_difference->Fit(pk_fit, "R");
   azimuth_fit->SetParameter(0, 1E4);
+    std::cout << "\n Fitting azimuth angles: \n";
   azimuth_histo->Fit("azimuth_fit");
   polar_fit->SetParameter(0, 1E4);
+    std::cout << "\n Fitting polar angles: \n";
   polar_histo->Fit("polar_fit");
-  impulse_fit->SetParameter(0, 1.);
+  impulse_fit->SetParameter(1, -1.);
+    std::cout << "\n Fitting impulse modules: \n";
   impulse_histo->Fit("impulse_fit");
 
   all_difference->GetXaxis()->SetRangeUser(0, 2);
@@ -80,7 +87,7 @@ void analyze() {
   std::cout << "Second fit, on Polar angle: \n";
   std::cout << "Parameter: " << polar_fit->GetParameter(0) << "; reduced chi squared: " << polar_fit->GetChisquare() / polar_fit->GetNDF() << "; probability: " << polar_fit->GetProb() << "\n";
 
-  std::cout << "Third fit, on impulse module: \n";
+  std::cout << "Third fit, on impulse module: \n";  
   std::cout << "First parameter: " << impulse_fit->GetParameter(0) << "; second parameter: " << impulse_fit->GetParameter(1) << "; reduced chi squared: " << impulse_fit->GetChisquare() / impulse_fit->GetNDF() << "; probability:" << impulse_fit->GetProb() << "\n";
 
   std::cout << "Fourth fit, on invariant mass of decayed particles: \n";

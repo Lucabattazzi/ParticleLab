@@ -28,7 +28,7 @@ void loop() {
   TH1F* types_histo = new TH1F("types_histo", "Particle types", 7, 0, 7);  // ricorda di aggiornare l'asse delle ascisse inserendo i nomi delle particelle
   TH1F* azimuth_histo = new TH1F("azimuth_histo", "Azimuthal angle", 1E3, 0, 2 * TMath::Pi());
   TH1F* polar_histo = new TH1F("polar_histo", "Polar angle", 1E3, 0, TMath::Pi());
-  TH1F* impulse_histo = new TH1F("impulse_histo", "Impulse", 1E4, 0, 9);                       // all ranges to be set properly
+  TH1F* impulse_histo = new TH1F("impulse_histo", "Impulse module", 1E3, 0, 9);                // all ranges to be set properly
   TH1F* transimpulse_histo = new TH1F("transimpulse_histo", "Transverse impulse", 1E4, 0, 7);  // English?
   TH1F* energy_histo = new TH1F("energy_histo", "Energy", 1E4, 0, 6.4);
   TH1F* invariant_mass_all_histo = new TH1F("invariant_mass_all_histo", "Invariant mass between all particles", 1E4, 0, 8);                                       // on stable
@@ -37,8 +37,7 @@ void loop() {
   TH1F* invariant_mass_same_pk_histo = new TH1F("invariant_mass_same_pk_histo", "Invariant mass between pions and kaons of same charge", 1E3, 0, 8);              // on stable
   TH1F* invariant_mass_opposite_pk_histo = new TH1F("invariant_mass_opposite_pk_histo", "Invariant mass between pions and kaons of opposite charge", 1E3, 0, 8);  // on stable
   TH1F* invariant_mass_decayed_histo = new TH1F("invariant_mass_decayed_histo", "Invariant mass between decayed particles", 1E3, 0.4, 1.4);                       // on decayed, for benchmark
-                                                                                                                                                                  // for (int i = 0; i < 10E5; ++i) {
-                                                                                                                                                                  //   for (int j = 0; j < 10E2; j++) {
+
   for (int i = 0; i < 1E5; ++i) {
     for (int j = 0; j < 100; j++) {
       double phi = gRandom->Uniform(2 * TMath::Pi());
