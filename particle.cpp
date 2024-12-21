@@ -14,36 +14,6 @@ void Momentum::print() const {
             << "(" << x << ", " << y << ", " << z << ")";
 };
 double Momentum::norm() const { return std::hypot(x, y, z); }
-Particle::Particle(std::string name) {
-  std::size_t index = FindParticle(name);
-  if (index == types_.size()) {
-    std::cout << "abort \n";
-  } else {
-    index_ = index;
-  }
-};
-
-Particle::Particle(std::string name, Momentum const& momentum = Momentum{0., 0., 0.}) : momentum_{momentum} {
-  std::size_t index = FindParticle(name);
-  if (index == types_.size()) {
-    std::cout << "abort \n";  // da gestire con eccezioni
-  } else {
-    index_ = index;
-  }
-}
-
-void Particle::setMomentum(double x, double y, double z) {
-  momentum_.x = x;
-  momentum_.y = y;
-  momentum_.z = z;
-};
-
-std::string Particle::getName() const { return types_[getIndex()]->getName(); };
-
-Momentum operator+(Momentum const& a, Momentum const& b) { return Momentum{a.x + b.x, a.y + b.y, a.z + b.z}; }
-
-std::vector<ParticleType*> Particle::types_;
-int Particle::getIndex() const { return index_; }
 std::size_t Particle::FindParticle(const std::string name) {
   for (size_t i = 0; i < types_.size(); ++i) {
     if (types_[i]->getName() == name) {
@@ -52,8 +22,35 @@ std::size_t Particle::FindParticle(const std::string name) {
   }
   return types_.size();
 }
+Particle::Particle(std::string name) {
+  std::size_t index = FindParticle(name);
+  if (index == types_.size()) {
+    std::runtime_error e{"No mathcing particle found."};
+    throw e;
+  } else {
+    index_ = index;
+  }
+};
+Particle::Particle(std::string name, Momentum const& momentum = Momentum{0., 0., 0.}) : momentum_{momentum} {
+  std::size_t index = FindParticle(name);
+  if (index == types_.size()) {
+    std::runtime_error e{"No mathcing particle found."};
+    throw e;
+  } else {
+    index_ = index;
+  }
+}
+void Particle::setMomentum(double x, double y, double z) {
+  momentum_.x = x;
+  momentum_.y = y;
+  momentum_.z = z;
+};
+std::string Particle::getName() const { return types_[getIndex()]->getName(); };
+Momentum operator+(Momentum const& a, Momentum const& b) { return Momentum{a.x + b.x, a.y + b.y, a.z + b.z}; }  // abbiamo bisogno di questo?
+std::vector<ParticleType*> Particle::types_;
+int Particle::getIndex() const { return index_; }
 void Particle::AddParticleType(const std::string name, double mass, int charge, double width = 0.) {
-  if (FindParticle(name) == types_.size() && types_.size() <= maxtypes) {
+  if (FindParticle(name) == types_.size()) {
     if (width == 0) {
       ParticleType* particle = new ParticleType(name, mass, charge);
       types_.push_back(particle);
@@ -63,20 +60,21 @@ void Particle::AddParticleType(const std::string name, double mass, int charge, 
     }
     return;
   }
-  std::cout << "Cannot add \n";
+  std::cout << "The particle you're trying to add is already present. \n";  // in this case there's no reason to abort
 };
 void Particle::setIndex(const int index) {
-  if (index < static_cast <int> (types_.size())) {
+  if (index < static_cast<int>(types_.size())) {
     index_ = index;
-  } else{
-    std::cout << "index not in range \n";
+  } else {
+    std::runtime_error e{"No mathcing particle found."};  // abort, otherwise undefined behaviour of index could occur
+    throw e;
   }
-  
 };
 void Particle::setIndex(const std::string name) {
   std::size_t index = FindParticle(name);
   if (index == types_.size()) {
-    std::cout << "not found in array \n";
+    std::runtime_error e{"No mathcing particle found."};  // abort, otherwise undefined behaviour of index could occur
+    throw e;
   } else {
     index_ = index;
   }
@@ -101,9 +99,7 @@ void Particle::setMomentum(Momentum const& momentum) {
   momentum_.y = momentum.y;
   momentum_.z = momentum.z;
 }
-
 int Particle::getCharge() const { return (types_[getIndex()]->getCharge()); };
-
 int Particle::Decay2Body(Particle& dau1, Particle& dau2) const {
   if (getMass() == 0.0) {
     std::cout << "Decayment cannot be preformed if mass is zero\n";
@@ -112,61 +108,43 @@ int Particle::Decay2Body(Particle& dau1, Particle& dau2) const {
   double massMot = getMass();
   double massDau1 = dau1.getMass();
   double massDau2 = dau2.getMass();
-
-  if (index_ > -1) {  // add width effect
-
-    // gaussian random numbers
-
+  if (index_ > -1) {  // add width effect gaussian random numbers
     float x1, x2, w, y1;
-
     double invnum = 1. / RAND_MAX;
     do {
       x1 = 2.0 * rand() * invnum - 1.0;
       x2 = 2.0 * rand() * invnum - 1.0;
       w = x1 * x1 + x2 * x2;
     } while (w >= 1.0);
-
     w = sqrt((-2.0 * log(w)) / w);
     y1 = x1 * w;
-
     massMot += types_[index_]->getWidth() * y1;
   }
-
   if (massMot < massDau1 + massDau2) {
     std::cout << "Decayment cannot be preformed because mass is too low in this "
                  "channel\n";
     return 2;
   }
-
   double pout = sqrt((massMot * massMot - (massDau1 + massDau2) * (massDau1 + massDau2)) * (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2))) / massMot * 0.5;
-
   double norm = 2 * M_PI / RAND_MAX;
-
   double phi = rand() * norm;
   double theta = rand() * norm * 0.5 - M_PI / 2.;
   dau1.setMomentum(pout * sin(theta) * cos(phi), pout * sin(theta) * sin(phi), pout * cos(theta));
   dau2.setMomentum(-pout * sin(theta) * cos(phi), -pout * sin(theta) * sin(phi), -pout * cos(theta));
-
   double energy = sqrt(momentum_.x * momentum_.x + momentum_.y * momentum_.y + momentum_.z * momentum_.z + massMot * massMot);
-
   double bx = momentum_.x / energy;
   double by = momentum_.y / energy;
   double bz = momentum_.z / energy;
-
   dau1.Boost(bx, by, bz);
   dau2.Boost(bx, by, bz);
-
   return 0;
 }
 void Particle::Boost(double bx, double by, double bz) {
   double energy = getEnergy();
-
-  // Boost this Lorentz vector
   double b2 = bx * bx + by * by + bz * bz;
   double gamma = 1.0 / sqrt(1.0 - b2);
   double bp = bx * momentum_.x + by * momentum_.y + bz * momentum_.z;
   double gamma2 = b2 > 0 ? (gamma - 1.0) / b2 : 0.0;
-
   momentum_.x += gamma2 * bp * bx + gamma * bx * energy;
   momentum_.y += gamma2 * bp * by + gamma * by * energy;
   momentum_.z += gamma2 * bp * bz + gamma * bz * energy;
