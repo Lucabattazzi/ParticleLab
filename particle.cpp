@@ -22,15 +22,6 @@ std::size_t Particle::FindParticle(const std::string name) {
   }
   return types_.size();
 }
-Particle::Particle(std::string name) {
-  std::size_t index = FindParticle(name);
-  if (index == types_.size()) {
-    std::runtime_error e{"No mathcing particle found."};
-    throw e;
-  } else {
-    index_ = index;
-  }
-};
 Particle::Particle(std::string name, Momentum const& momentum = Momentum{0., 0., 0.}) : momentum_{momentum} {
   std::size_t index = FindParticle(name);
   if (index == types_.size()) {

@@ -20,7 +20,6 @@ Momentum operator+(Momentum const &, Momentum const &);
 class Particle {
  public:
   Particle(std::string, Momentum const &);
-  Particle(std::string);
   Particle() = default;
   Momentum getMomentum() const;
   int getIndex() const;
