@@ -2,6 +2,8 @@
 
 #include "TFile.h"
 #include "TH1F.h"
+#include "TCanvas.h"
+#include "TStyle.h"
 
 void visualize_v2() {
   TFile* data = new TFile("particle.root", "READ");
@@ -29,6 +31,7 @@ void visualize_v2() {
   TH1F* fit_impulse_histo = (TH1F*)fit->Get("impulse_histo");
 
   TCanvas* generation_information = new TCanvas("generation_information", "Generation Information");
+  gStyle->SetOptStat(1110);
   generation_information->Divide(2, 2);
   generation_information->cd(1);
   types_histo->GetYaxis()->SetTitle("Occurrencies");
@@ -57,6 +60,7 @@ void visualize_v2() {
   canvases->WriteObject(generation_information, "generation_information");
   
   TCanvas* additional_data = new TCanvas("additional_data", "Additional generation data");
+  gStyle->SetOptStat(1110);
   additional_data->Divide(3,3);
   additional_data->cd(1);
   transimpulse_histo->GetXaxis()->SetTitle("Transverse impulse relative to all particles (unspecified)");
@@ -99,26 +103,32 @@ void visualize_v2() {
   fit_graphs->cd(1);
   fit_azimuth_histo->GetXaxis()->SetTitle("Initial azimuthal angle (rad)");
   fit_azimuth_histo->GetYaxis()->SetTitle("Occurrencies");
+  gStyle->SetOptStat(2210);
   fit_azimuth_histo->Draw();
   fit_graphs->cd(2);
   fit_polar_histo->GetXaxis()->SetTitle("Initial polar angle (rad)");
   fit_polar_histo->GetYaxis()->SetTitle("Occurrencies");
+  gStyle->SetOptStat(2210);
   fit_polar_histo->Draw();
   fit_graphs->cd(3);
   fit_impulse_histo->GetXaxis()->SetTitle("Initial impulse module (unspecified)");
   fit_impulse_histo->GetYaxis()->SetTitle("Occurrencies");
+  gStyle->SetOptStat(2210);
   fit_impulse_histo->Draw();
   fit_graphs->cd(4);
   all_difference->GetXaxis()->SetTitle("Difference between corresponding bins");
   all_difference->GetYaxis()->SetTitle("Occurrencies");
+  gStyle->SetOptStat(2200);
   all_difference->Draw();
   fit_graphs->cd(5);
   pk_difference->GetXaxis()->SetTitle("Difference between corresponding bins");
   pk_difference->GetYaxis()->SetTitle("Occurrencies");
+  gStyle->SetOptStat(2200);
   pk_difference->Draw();  
   fit_graphs->cd(6);
   fit_invariant_mass_decayed_histo->GetXaxis()->SetTitle("Invariant mass (unspecified)");
   fit_invariant_mass_decayed_histo->GetYaxis()->SetTitle("Occurrencies");
+  gStyle->SetOptStat(2200);
   fit_invariant_mass_decayed_histo->Draw();
   fit_graphs->SaveAs("_fit_graphs.pdf");
   fit_graphs->SaveAs("_fit_graphs.C");
