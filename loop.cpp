@@ -37,7 +37,7 @@ int loop() {
   TH1F* invariant_mass_opposite_histo = new TH1F("invariant_mass_opposite_histo", "Invariant mass between particles of opposite charge", 5E2, 0, 8);
   TH1F* invariant_mass_same_pk_histo = new TH1F("invariant_mass_same_pk_histo", "Invariant mass between pions and kaons of same charge", 1E3, 0, 8);
   TH1F* invariant_mass_opposite_pk_histo = new TH1F("invariant_mass_opposite_pk_histo", "Invariant mass between pions and kaons of opposite charge", 1E3, 0, 8);
-  TH1F* invariant_mass_decayed_histo = new TH1F("invariant_mass_decayed_histo", "Invariant mass between decayed particles", 1E3, 0.4, 1.4);
+  TH1F* invariant_mass_decayed_histo = new TH1F("invariant_mass_decayed_histo", "Decayed particles", 1E3, 0.4, 1.4);
 
   for (int i = 0; i < 1E5; ++i) {
     for (int j = 0; j < 100; j++) {
