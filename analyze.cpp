@@ -5,6 +5,17 @@
 #include "TFile.h"
 #include "TH1F.h"
 
+void gaussAmplitude(TF1* func) {  // sigma = [0], a = [2]
+  double par_0 = func->GetParameter(0);
+  double par_0_err = func->GetParError(0);
+  double par_2 = func->GetParameter(2);
+  double par_2_err = func->GetParError(2);
+
+  double value = par_2 / (TMath::Sqrt(2 * TMath::Pi()) * par_0);
+  double error = TMath::Sqrt(TMath::Power((par_2_err / (TMath::Sqrt(2 * TMath::Pi()) * par_0)), 2) + TMath::Power(par_2 * par_0_err / (TMath::Sqrt(2 * TMath::Pi()) * TMath::Power(par_0, 2)), 2));
+  std::cout << "amplitude: " << value << " +/- " << error << "\n";
+}
+
 void analyze() {
   TFile* data = new TFile("particle.root", "UPDATE");
   TFile* fit = new TFile("fit.root", "RECREATE");
@@ -28,14 +39,8 @@ void analyze() {
   TH1F* invariant_mass_same_pk_histo = (TH1F*)data->Get("invariant_mass_same_pk_histo");
   TH1F* invariant_mass_opposite_pk_histo = (TH1F*)data->Get("invariant_mass_opposite_pk_histo");
   TH1F* invariant_mass_decayed_histo = (TH1F*)data->Get("invariant_mass_decayed_histo");
-
-  TH1F* all_difference = new TH1F("all_difference", "Difference of all particles with opposite charge", 5E2, 0, 8);
-  TH1F* pk_difference = new TH1F("pk_difference", "Difference between pions and kaons with opposite charge and same charge", 1E3, 0, 8);
-
-  std::cout << "Check proportions: \n";
-  for (int i = 1; i <= types_histo->GetNbinsX(); i++) {
-    std::cout << types_histo->GetBinContent(i) / 1E5 << "% +- " << types_histo->GetBinError(i) / 1E5 << "%\n";
-  }
+  TH1F* all_difference = new TH1F("all_difference", "All particles same and opposite charge difference", 5E2, 0, 8);
+  TH1F* pk_difference = new TH1F("pk_difference", "Pions and kaons same and opposite charge difference", 1E3, 0, 8);
 
   invariant_mass_same_histo->Sumw2();
   invariant_mass_opposite_histo->Sumw2();
@@ -81,21 +86,29 @@ void analyze() {
   fit->WriteObject(polar_histo, "polar_histo");
   fit->WriteObject(impulse_histo, "impulse_histo");
 
-  std::cout << "First fit, on Azimuth angle: \n";
-  std::cout << "Parameter: " << azimuth_fit->GetParameter(0) << "; chi squared: " << azimuth_fit->GetChisquare() << "; DOF: " << azimuth_fit->GetNDF() << "; reduced chi squared: " << azimuth_fit->GetChisquare() / azimuth_fit->GetNDF() << "; probability: " << azimuth_fit->GetProb() << "\n";
+  std::cout << "\nCheck proportions: \n";
+  for (int i = 1; i <= types_histo->GetNbinsX(); i++) {
+    std::cout << types_histo->GetBinContent(i) / 1E5 << "% +- " << types_histo->GetBinError(i) / 1E5 << "%\n";
+  }
+  
+  std::cout << "\nFirst fit, on Azimuth angle:";
+  std::cout << "\nParameter: " << azimuth_fit->GetParameter(0) << "\nchi squared: " << azimuth_fit->GetChisquare() << "\nDOF: " << azimuth_fit->GetNDF() << "\nreduced chi squared: " << azimuth_fit->GetChisquare() / azimuth_fit->GetNDF() << "\nprobability: " << azimuth_fit->GetProb() << "\n";
 
-  std::cout << "Second fit, on Polar angle: \n";
-  std::cout << "Parameter: " << polar_fit->GetParameter(0) <<"; chi squared: " << polar_fit->GetChisquare() << "; DOF: " << polar_fit->GetNDF() << "; reduced chi squared: " << polar_fit->GetChisquare() / polar_fit->GetNDF() << "; probability: " << polar_fit->GetProb() << "\n";
+  std::cout << "\nSecond fit, on Polar angle:";
+  std::cout << "\nParameter: " << polar_fit->GetParameter(0) << "\nchi squared: " << polar_fit->GetChisquare() << "\nDOF: " << polar_fit->GetNDF() << "\nreduced chi squared: " << polar_fit->GetChisquare() / polar_fit->GetNDF() << "\nprobability: " << polar_fit->GetProb() << "\n";
 
-  std::cout << "Third fit, on impulse module: \n";
-  std::cout << "First parameter: " << impulse_fit->GetParameter(0) << "; second parameter: " << impulse_fit->GetParameter(1) <<"; chi squared: " << impulse_fit->GetChisquare() << "; DOF: " << impulse_fit->GetNDF() << "; reduced chi squared: " << impulse_fit->GetChisquare() / impulse_fit->GetNDF() << "; probability:" << impulse_fit->GetProb() << "\n";
+  std::cout << "\nThird fit, on impulse module: ";
+  std::cout << "\nFirst parameter: " << impulse_fit->GetParameter(0) << "\nsecond parameter: " << impulse_fit->GetParameter(1) << " +/- " << impulse_fit->GetParError(1) << "\nchi squared: " << impulse_fit->GetChisquare() << "\nDOF: " << impulse_fit->GetNDF() << "\nreduced chi squared: " << impulse_fit->GetChisquare() / impulse_fit->GetNDF() << "\nprobability:" << impulse_fit->GetProb() << "\n";
 
-  std::cout << "Fourth fit, on invariant mass of decayed particles: \n";
-  std::cout << "First parameter: " << decayed_fit->GetParameter(0) << "; second parameter: " << decayed_fit->GetParameter(1) << "; third parameter: " << decayed_fit->GetParameter(2) << "; reduced chi squared: " << decayed_fit->GetChisquare() / decayed_fit->GetNDF() << "; probability:" << decayed_fit->GetProb() << "\n";
+  std::cout << "\nFourth fit, on invariant mass of decayed particles: ";
+  std::cout << "\nsigma: " << decayed_fit->GetParameter(0) << " +/- " << decayed_fit->GetParError(0) << "\nmean: " << decayed_fit->GetParameter(1) << " +/- " << decayed_fit->GetParError(1) << "\nthird parameter: " << decayed_fit->GetParameter(2) << "\nreduced chi squared: " << decayed_fit->GetChisquare() / decayed_fit->GetNDF() << "\nprobability:" << decayed_fit->GetProb() << "\n";
+  gaussAmplitude(decayed_fit);
 
-  std::cout << "Fifth fit, on signal from all particles: \n";
-  std::cout << "First parameter: " << all_fit->GetParameter(0) << "; second parameter: " << all_fit->GetParameter(1) << "; third parameter: " << all_fit->GetParameter(2) << "; reduced chi squared: " << all_fit->GetChisquare() / all_fit->GetNDF() << "; probability:" << all_fit->GetProb() << "\n";
+  std::cout << "\nFifth fit, on signal from all particles: ";
+  std::cout << "\nsigma: " << all_fit->GetParameter(0) << " +/- " << all_fit->GetParError(0) << "\nmean: " << all_fit->GetParameter(1) << " +/- " << all_fit->GetParError(1) << "\nthird parameter: " << all_fit->GetParameter(2) << "\nreduced chi squared: " << all_fit->GetChisquare() / all_fit->GetNDF() << "\nprobability:" << all_fit->GetProb() << "\n";
+  gaussAmplitude(all_fit);
 
-  std::cout << "Sixth fit, on signal from pion and kaon particles: \n";
-  std::cout << "First parameter: " << pk_fit->GetParameter(0) << "; second parameter: " << pk_fit->GetParameter(1) << "; third parameter: " << pk_fit->GetParameter(2) << "; reduced chi squared: " << pk_fit->GetChisquare() / pk_fit->GetNDF() << "; probability:" << pk_fit->GetProb() << "\n";
+  std::cout << "\nSixth fit, on signal from pion and kaon particles: ";
+  std::cout << "\nsigma: " << pk_fit->GetParameter(0) << " +/- " << pk_fit->GetParError(0) << "\nmean: " << pk_fit->GetParameter(1) << " +/- " << pk_fit->GetParError(1) << "\nthird parameter: " << pk_fit->GetParameter(2) << "\nreduced chi squared: " << pk_fit->GetChisquare() / pk_fit->GetNDF() << "\nprobability:" << pk_fit->GetProb() << "\n";
+  gaussAmplitude(pk_fit);
 }
