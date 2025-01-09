@@ -21,9 +21,9 @@ int loop() {
   gRandom->SetSeed();
   std::vector<p::Particle> event;  // all particles of first generation (including K*)
   event.reserve(100);
-  std::vector<p::Particle> decayed;  // K* daughters
+  std::vector<p::Particle> decayed;  // only K* daughters
   decayed.reserve(20);
-  std::vector<p::Particle> stable;  // allstable particles (including K* daughters)
+  std::vector<p::Particle> stable;  // all stable particles (including K* daughters)
   stable.reserve(120);
   TFile* data = new TFile("particle.root", "RECREATE");
   TH1F* types_histo = new TH1F("types_histo", "Particle types", 7, 0, 7);
@@ -125,5 +125,5 @@ int loop() {
   }
   data->Write();
   data->Close();
-  return 0;  // fine execution of the program
+  return 0;  // end execution of the program
 }

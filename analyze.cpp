@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <iostream>
 
 #include "TF1.h"
@@ -90,7 +89,7 @@ void analyze() {
   for (int i = 1; i <= types_histo->GetNbinsX(); i++) {
     std::cout << types_histo->GetBinContent(i) / 1E5 << "% +- " << types_histo->GetBinError(i) / 1E5 << "%\n";
   }
-  
+
   std::cout << "\nFirst fit, on Azimuth angle:";
   std::cout << "\nParameter: " << azimuth_fit->GetParameter(0) << "\nchi squared: " << azimuth_fit->GetChisquare() << "\nDOF: " << azimuth_fit->GetNDF() << "\nreduced chi squared: " << azimuth_fit->GetChisquare() / azimuth_fit->GetNDF() << "\nprobability: " << azimuth_fit->GetProb() << "\n";
 

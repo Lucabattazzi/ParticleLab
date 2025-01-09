@@ -7,7 +7,6 @@
 #include "particletype.hpp"
 
 namespace p {
-// constexpr int maxtypes = 7; // non ci serve
 
 struct Momentum {
   double x;

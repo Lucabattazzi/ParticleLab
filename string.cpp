@@ -1,7 +1,7 @@
-#include<string>
-#include<iostream>
+#include <iostream>
+#include <string>
 
-void pippo(){
-    std::string pippo = "pippo";
-    std::cout<< pippo;
+void pippo() {
+  std::string pippo = "pippo";
+  std::cout << pippo;
 }
